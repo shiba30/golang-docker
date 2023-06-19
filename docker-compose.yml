@@ -1,0 +1,35 @@
+version: "3.8"
+services:
+  db:
+    image: mysql:8.0
+    restart: always # コンテナが停止したときに常に再起動する設定
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: myapp
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    environment:
+      DBUSER: user
+      DBPASS: password
+    volumes:
+      - .:/app_gin
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy # dbが準備完了状態まで待つ
+
+volumes:
+  db_data:
