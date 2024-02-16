@@ -1,19 +1,19 @@
 version: "3.8"
-
 services:
   db:
-    image: postgres:15.5
+    image: mysql:8.0
     restart: always # コンテナが停止したときに常に再起動する設定
     environment:
-      POSTGRES_DB: myapp
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: myapp
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/mysql
     healthcheck:
-      test: pg_isready -h 127.0.0.1 -U postgres -d myapp
+      test: mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD
 
   web:
     build:
@@ -21,15 +21,12 @@ services:
       dockerfile: Dockerfile
       target: development
     environment:
-      DB_HOST: db
-      DB_USER: postgres
-      DB_PASS: password
-      DB_PORT: 5432
-      DB_NAME: myapp
+      DBUSER: user
+      DBPASS: password
     volumes:
       - .:/app_gin
     ports:
-      - "80:8080"
+      - "8080:8080"
     depends_on:
       db:
         condition: service_healthy # dbが準備完了状態まで待つ
