@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/lib/pq"
+	"github.com/go-sql-driver/mysql"
 )
 
 var db *sql.DB
@@ -133,12 +133,17 @@ func deleteAlbumByID(c *gin.Context) {
 }
 
 func main() {
-	dbinfo := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=require",
-		os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_USER"), os.Getenv("DB_PASS"), os.Getenv("DB_NAME"))
+	config := mysql.Config{
+		User:                 os.Getenv("DBUSER"),
+		Passwd:               os.Getenv("DBPASS"),
+		Net:                  "tcp",
+		Addr:                 "db:3306",
+		DBName:               "myapp",
+		AllowNativePasswords: true,
+	}
 
 	var err error
-	db, err = sql.Open("postgres", dbinfo)
+	db, err = sql.Open("mysql", config.FormatDSN())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -155,11 +160,6 @@ func main() {
 	router.POST("/albums", postAlbums)
 	router.PATCH("/albums/:id", updateAlbumByID)
 	router.DELETE("/albums/:id", deleteAlbumByID)
-
-	// ヘルスチェックのエンドポイントを追加
-	router.GET("/health", func(c *gin.Context) {
-		c.Status(http.StatusOK) // HTTP 200 OKレスポンスを返す
-	})
 
 	router.Run("0.0.0.0:8080")
 }

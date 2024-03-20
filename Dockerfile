@@ -19,6 +19,9 @@ RUN go build -o main /app_gin/main.go
 # air インストール
 RUN go get -u github.com/cosmtrek/air && go build -o /go/bin/air github.com/cosmtrek/air
 
+# curl インストール
+RUN apk --no-cache add curl
+
 # .air.toml ファイルをコピー
 COPY .air.toml ./
 

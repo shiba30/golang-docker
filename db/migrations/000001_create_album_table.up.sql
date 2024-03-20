@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS album;
 CREATE TABLE album (
   id         BIGSERIAL NOT NULL,
   title      VARCHAR(128) NOT NULL,
